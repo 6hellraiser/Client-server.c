@@ -6,13 +6,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+char login[20], password[20];
+
 int main()
 {
+   // f = fopen("input.txt","r");
     int sockfd;
     int len;
     struct sockaddr_in address;
     int result;
-    char ch = 'A';
+    char command[1024];
+
     sockfd = socket(AF_INET,SOCK_STREAM,0);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -24,9 +28,74 @@ int main()
         perror("oops:client");
         exit(1);
     }
-    write(sockfd,&ch,1);
-    read(sockfd,&ch,1);
-    printf("char from server = %c\n",ch);
+
+    printf("Login: \n");
+    scanf("%s",login);
+    printf("Password: \n");
+    scanf("%s",password);
+
+    char* message = malloc(sizeof(char)*(strlen(login)+strlen(password)));
+    int i;
+    for (i = 0; i < strlen(login); i++)
+    {
+        message[i] = login[i];
+    }
+    i = 0;
+    for (int j = strlen(login); j< len; j++)
+    {
+        message[j] = password[i];
+        i++;
+    }
+    int len1 = strlen(message);
+    send(sockfd, &len1, sizeof(int),0);
+    send(sockfd,message,sizeof(char)*len1,0);
+    int response;
+    recv(sock,&response,sizeof(int),0);
+
+    if (response == 1)
+    {
+        getchar();
+        while(1)
+        {
+            int index = 0;
+            int letter;
+
+            while(getchar()) != '\n')
+            {
+                letter = getchar();
+                command[index] = letter;
+                index++;
+            }
+            command[index] = NULL;
+
+            printf("\n");
+
+            int length = strlen(command);
+            send(sockfd,&length,sizeof(int),0);
+            send(sockfd,command,sizeof(char)*length,0);
+
+            int n = 0;
+            memset(command,0,sizeof(command));
+            recv(sockfd,&n,sizeof(int),0);
+            if (n == -1)
+                printf("Error in command \n");
+            else
+            while(n > 0)
+            {
+                recv(sockfd,&length,sizeof(int),0);
+                recv(sockfd,command,sizeof(char)*length,0);
+                printf("%s \n",command);
+                memset(command,0,sizeof(command));
+                n--;
+             }
+             memset(command,0,sizeof(command));
+             printf("\n\n");
+        }
+    }
+    else
+    {
+        printf("Incorrect login or password\n");
+    }
     close(sockfd);
-    exit(0);
+    return 0;
 }

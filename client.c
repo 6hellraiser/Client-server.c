@@ -41,7 +41,8 @@ int main()
         message[i] = login[i];
     }
     i = 0;
-    for (int j = strlen(login); j< len; j++)
+    int j;
+    for (j = strlen(login); j< len; j++)
     {
         message[j] = password[i];
         i++;
@@ -50,20 +51,23 @@ int main()
     send(sockfd, &len1, sizeof(int),0);
     send(sockfd,message,sizeof(char)*len1,0);
     int response;
-    recv(sock,&response,sizeof(int),0);
+    recv(sockfd,&response,sizeof(int),0);
 
     if (response == 1)
     {
+        printf("Success\n");
+        printf(">>");
         getchar();
         while(1)
         {
             int index = 0;
             int letter;
 
-            while(getchar()) != '\n')
+            while((letter = getchar()) != '\n')
             {
-                letter = getchar();
+                //letter = getchar();
                 command[index] = letter;
+               // printf("%s",command[index]);
                 index++;
             }
             command[index] = NULL;
@@ -90,6 +94,7 @@ int main()
              }
              memset(command,0,sizeof(command));
              printf("\n\n");
+             printf(">>");
         }
     }
     else
